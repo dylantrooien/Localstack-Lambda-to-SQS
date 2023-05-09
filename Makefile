@@ -40,7 +40,7 @@ docker-clean: ## Clean docker
 # Terraform
 ################################################################################
 
-terraform-up: terraform-graph ## Start terraform
+terraform-up: ## Start terraform
 	@echo "Starting terraform"
 	@cd $(ROOT_DIRECTORY) && \
 		terraform init && \
@@ -59,6 +59,30 @@ terraform-down: ## Stop terraform
 
 terraform-reload: terraform-down terraform-up ## Restart terraform
 	@echo "Restarting terraform"
+
+################################################################################
+# Terraform tflocal
+################################################################################
+
+tflocal-up: ## Start tflocal
+	@echo "Starting tflocal"
+	@cd $(ROOT_DIRECTORY) && \
+		tflocal init && \
+		tflocal plan && \
+		tflocal apply -auto-approve && \
+		echo "tflocal is running" && \
+		echo "To stop tflocal, run 'make tflocal-down'"
+
+tflocal-down: ## Stop tflocal
+	@echo "Stopping tflocal"
+	@cd $(ROOT_DIRECTORY) && \
+ 		tflocal destroy -auto-approve && \
+		rm -rf .terraform .terrahform.* terraform.* localstack_* graph.svg && \
+		echo "tflocal is stopped" && \
+		echo "To start tflocal, run 'make tflocal-up'"
+
+tflocal-reload: tflocal-down tflocal-up ## Restart tflocal
+	@echo "Restarting tflocal"
 
 ################################################################################
 # Lambdas
@@ -105,6 +129,13 @@ shell-database: ## Enter shell in database container
 shell-localstack: ## Enter shell in localstack container
 	@echo "Entering shell in localstack container"
 	@docker exec -it localstack /bin/bash
+
+################################################################################
+# Mocks
+################################################################################
+mock-trigger-batch-lambda: ## Trigger batch lambda
+	@echo "Triggering batch lambda"
+	@docker exec -it localstack awslocal lambda invoke --function-name integration-marketo-batch-lambda-local --payload '{"Records": [{"body": "{\"id\": \"1\"}"}]}' /tmp/response.json
 
 ################################################################################
 # Monitoring

@@ -39,7 +39,7 @@ provider "aws" {
 
 locals {
   app_name = "integration-marketo"
-  pwd      = "/home/s/Desktop/Projects/Microservice"
+  pwd      = "/home/s/Desktop/Projects/Lambda-to-sqs"
 }
 
 variable "environment" {
