@@ -13,25 +13,22 @@ import (
 )
 
 func Handler(_ context.Context) (string, error) {
-	//queueUrl := "http://localhost:4566/000000000000/integration-marketo-batch-queue-local"
 	queueUrl := os.Getenv("QUEUE_URL")
+	queueEndpoint := os.Getenv("QUEUE_ENDPOINT")
+	localstackHostname := os.Getenv("LOCALSTACK_HOSTNAME")
+	localstackPort := os.Getenv("EDGE_PORT")
+	if len(localstackHostname) > 0 && len(localstackPort) > 0 {
+		queueEndpoint = fmt.Sprintf("http://%s:%s", localstackHostname, localstackPort)
+	}
 	fmt.Println("QUEUE:", queueUrl)
-	// Print the current time
+	fmt.Println("ENDPOINT:", queueEndpoint)
 	fmt.Println("The time is", time.Now().Format(time.RFC1123))
-	//sess, err := session.NewSessionWithOptions(session.Options{
-	//	Config: aws.Config{
-	//		Region:      aws.String("us-east-1"),
-	//		Credentials: credentials.NewStaticCredentials("test", "test", "test"),
-	//		Endpoint:    aws.String(queueUrl),
-	//	},
-	//})
 	sess, err := session.NewSession(&aws.Config{
 		Region:           aws.String("us-east-1"),
 		Credentials:      credentials.NewStaticCredentials("test", "test", ""),
 		S3ForcePathStyle: aws.Bool(true),
-		Endpoint:         aws.String("http://localhost:4566"),
+		Endpoint:         aws.String(queueEndpoint),
 	})
-	//sess, err := session.NewSession()
 
 	// Create an SQS client
 	svc := sqs.New(sess)
